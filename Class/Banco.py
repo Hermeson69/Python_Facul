@@ -39,8 +39,23 @@ class Conta:
     def extrato(self):
         print(f"Titular: {self.titular} | Saldo: {self.saldo} | Número: {self.numero}")
 
+
+class Transacao:
+    def __init__(self, tipo, valor, conta_origem=None, conta_destino=None):
+        self.tipo = tipo
+        self.valor = valor
+        self.conta_origem = conta_origem
+        self.conta_destino = conta_destino
+
+    def detalhes(self):
+        if self.tipo == "transferencia":
+            return f"Transferência de {self.valor} de {self.conta_origem.numero} para {self.conta_destino.numero}"
+        else:
+            return f"{self.tipo.capitalize()} de {self.valor} na conta {self.conta_origem.numero}"
+
 def main():
-    contas = {} 
+    contas = {}
+    transacoes = []
     op = menu()
 
     while op != 6:
@@ -49,6 +64,7 @@ def main():
             if numero in contas:
                 valor = float(input("Digite o valor a ser depositado: "))
                 contas[numero].depositar(valor)
+                transacoes.append(Transacao("deposito", valor, conta_origem=contas[numero]))
             else:
                 print("Conta não encontrada.")
 
@@ -57,6 +73,7 @@ def main():
             if numero in contas:
                 valor = float(input("Digite o valor a ser sacado: "))
                 contas[numero].sacar(valor)
+                transacoes.append(Transacao("saque", valor, conta_origem=contas[numero]))
             else:
                 print("Conta não encontrada.")
 
@@ -80,6 +97,7 @@ def main():
             if numero_origem in contas and numero_destino in contas:
                 valor = float(input("Digite o valor a ser transferido: "))
                 contas[numero_origem].transferir(contas[numero_destino], valor)
+                transacoes.append(Transacao("transferencia", valor, conta_origem=contas[numero_origem], conta_destino=contas[numero_destino]))
             else:
                 print("Conta de origem ou destino não encontrada.")
 
@@ -87,5 +105,8 @@ def main():
             print("Opção inválida.")
 
         op = menu()
+
+    for transacao in transacoes:
+        print(transacao.detalhes())
 
 main()
