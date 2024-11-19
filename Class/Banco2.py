@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def menu():
     print("1 - Depositar Dinheiro\n")
     print("2 - Sacar Dinheiro\n")
@@ -39,19 +41,19 @@ class Conta:
     def extrato(self):
         print(f"Titular: {self.titular} | Saldo: {self.saldo} | Número: {self.numero}")
 
-
 class Transacao:
     def __init__(self, tipo, valor, conta_origem=None, conta_destino=None):
         self.tipo = tipo
         self.valor = valor
         self.conta_origem = conta_origem
         self.conta_destino = conta_destino
+        self.data_hora = datetime.now()
 
     def detalhes(self):
         if self.tipo == "transferencia":
-            return f"Transferência de {self.valor} de {self.conta_origem.numero} para {self.conta_destino.numero}"
+            return f"{self.data_hora} - Transferência de {self.valor} de {self.conta_origem.numero} para {self.conta_destino.numero}"
         else:
-            return f"{self.tipo.capitalize()} de {self.valor} na conta {self.conta_origem.numero}"
+            return f"{self.data_hora} - {self.tipo.capitalize()} de {self.valor} na conta {self.conta_origem.numero}"
 
 def main():
     contas = {}
