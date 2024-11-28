@@ -3,51 +3,58 @@ class Elevador:
         self._andar_atual = andar_atual
         self._total_andares = total_andares
         self._capacidade = capacidade
-        self._pessoas = []
+        self._pessoas = 0
+
     @property
     def andar_atual(self):
         return self._andar_atual
+
     @property
     def total_andares(self):
         return self._total_andares
+
     @property
     def capacidade(self):
         return self._capacidade
+
     @property
     def pessoas(self):
         return self._pessoas
+
     def inicializar(self):
         self._andar_atual = 0
-        self._pessoas = []
-    def entrar(self, nome):
-        if len(self._pessoas) < self._capacidade:
-            self._pessoas.append(nome)
+        self._pessoas = 0
+
+    def entrar(self):
+        if self._pessoas < self._capacidade:
+            self._pessoas += 1
         else:
             print("Elevador cheio.")
-    def sair(self, nome):
-        if nome in self._pessoas:
-            self._pessoas.remove(nome)
+
+    def sair(self):
+        if self._pessoas > 0:
+            self._pessoas -= 1
         else:
-            print("Pessoa não está no elevador.")
+            print("Elevador vazio.")
+
     def escolher_andar(self, andar):
-        if andar >= 0 and andar <= self._total_andares:
+        if 0 <= andar <= self._total_andares:
             self._andar_atual = andar
-        elif andar < 0:
-            print("Andar inválido.")
-        elif andar > self._total_andares:
-            print("Andar inválido.")
         else:
             print("Andar inválido.")
+
     def subir(self):
         if self._andar_atual < self._total_andares:
             self._andar_atual += 1
         else:
             print("Elevador no último andar.")
+
     def descer(self):
         if self._andar_atual > 0:
             self._andar_atual -= 1
         else:
             print("Elevador no térreo, andar = 0.")
+
 def menu():
     print("1 - Inicializar\n2 - Entrar\n3 - Sair\n4 - Subir\n5 - Descer\n6 - Escolher Andar\n7 - Sair")
     op = int(input("Digite uma das opções acima: "))
@@ -60,11 +67,9 @@ def main():
         if opcao == 1:
             elevador.inicializar()
         elif opcao == 2:
-            nome = input("Digite o nome da pessoa: ")
-            elevador.entrar(nome)
+            elevador.entrar()
         elif opcao == 3:
-            nome = input("Digite o nome da pessoa: ")
-            elevador.sair(nome)
+            elevador.sair()
         elif opcao == 4:
             elevador.subir()
         elif opcao == 5:
@@ -77,5 +82,5 @@ def main():
         else:
             print("Opção inválida. Tente novamente.")
         print(f"Andar atual: {elevador.andar_atual}\nPessoas: {elevador.pessoas}")
-    
+
 main()

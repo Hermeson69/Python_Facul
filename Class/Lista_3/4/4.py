@@ -1,4 +1,4 @@
-class Televisao:
+class controle_remoto:
     def __init__(self, volume, canal_atual):
         self._volume = volume
         self._canal_atual = canal_atual
@@ -49,7 +49,7 @@ def menu():
         return op
     
 def main():
-        tv = Televisao (0, 0)
+        tv = controle_remoto (0, 0)
         while True:
             opcao = menu()
             if opcao == 1:
