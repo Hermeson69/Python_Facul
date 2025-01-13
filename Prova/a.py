@@ -1,139 +1,137 @@
 # import abc
 
 
-# # num = int(input("Digite um numero: "))
+# num = int(input("Digite um numero: "))
 
-# # anterior =  num
-# # estimativa = 1
+# anterior =  num
+# estimativa = 1
 
-# # while estimativa != anterior:
-# #     anterior = estimativa
-# #     estimativa = (estimativa + (num/estimativa))/2
+# while estimativa != anterior:
+#     anterior = estimativa
+#     estimativa = (estimativa + (num/estimativa))/2
     
-# # print(estimativa)
+# print(estimativa)
 
-# # def achar_primo(num):
-# #     return all(num % i != 0 for i in range(2, num))
+# def achar_primo(num):
+#     return all(num % i != 0 for i in range(2, num))
 
-# # num = int(input("Digite um numero: "))
-# # if achar_primo(num):
-# #     print("Numero primo")
-# # else:
-# #     print("Numero não primo")
+# num = int(input("Digite um numero: "))
+# if achar_primo(num):
+#     print("Numero primo")
+# else:
+#     print("Numero não primo")
 
-# # def achar_primo(num):
-# #     for i in range(2,num):
-# #         if num % i == 0:
-# #             return False
-# #     return  True
+# def achar_primo(num):
+#     for i in range(2,num):
+#         if num % i == 0:
+#             return False
+#     return  True
 
-# # num = int(input("Digite um numero: "))
-# # if achar_primo(num):
-# #     print("Numero primo")
-# # else:
-# #     print("Numero não primo")
+# num = int(input("Digite um numero: "))
+# if achar_primo(num):
+#     print("Numero primo")
+# else:
+#     print("Numero não primo")
 
-# # def calcular_anos(X, Y):
-# #     anos = 0
-# #     while X <= Y:
-# #         X = X + X * 0.03
-# #         Y = Y + Y * 0.015
-# #         anos += 1
-# #     return anos
+# def calcular_anos(X, Y):
+#     anos = 0
+#     while X <= Y:
+#         X = X + X * 0.03
+#         Y = Y + Y * 0.015
+#         anos += 1
+#     return anos
 
-# # def valor_serie(n):
-# #     soma = 0
-# #     for i in range (1, n + 1):
-# #         soma += i / (2* i -1)
+# def valor_serie(n):
+#     soma = 0
+#     for i in range (1, n + 1):
+#         soma += i / (2* i -1)
 
-# #     return soma
+#     return soma
 
-# # num = int(input("Digite um numero: "))
-# # print(valor_serie(num))
+# num = int(input("Digite um numero: "))
+# print(valor_serie(num))
 
-# # def raiz_quadrada(numero):
-# #     anterior = numero
-# #     estimativa = 1
+# def raiz_quadrada(numero):
+#     anterior = numero
+#     estimativa = 1
 
-# #     while estimativa != anterior:
-# #         anterior = estimativa
-# #         estimativa = (estimativa + (numero / estimativa)) / 2
+#     while estimativa != anterior:
+#         anterior = estimativa
+#         estimativa = (estimativa + (numero / estimativa)) / 2
     
-# #     return estimativa
+#     return estimativa
 
-# # def pitagoras(a, b):
-# #     c_quadrado = (a * a) + (b * b) 
-# #     return raiz_quadrada(c_quadrado)  
+# def pitagoras(a, b):
+#     c_quadrado = (a * a) + (b * b) 
+#     return raiz_quadrada(c_quadrado)  
 
-# # a = float(input("Digite o valor de a: "))
-# # b = float(input("Digite o valor de b: "))
-# # c = pitagoras(a, b)
-# # print(f"O valor de c é: {c}")
+# a = float(input("Digite o valor de a: "))
+# b = float(input("Digite o valor de b: "))
+# c = pitagoras(a, b)
+# print(f"O valor de c é: {c}")
 
 
-# # questão conceitual:
+# class Produto:
+#     def __init__(self, nome, preco):
+#         self._nome = nome
+#         self._preco = preco
 
-# # class Produto:
-# #     def __init__(self, nome, preco):
-# #         self._nome = nome
-# #         self._preco = preco
+#     @property
+#     def nome(self):
+#         return self._nome
 
-# #     @property
-# #     def nome(self):
-# #         return self._nome
+#     @property
+#     def preco(self):
+#         return self._preco
 
-# #     @property
-# #     def preco(self):
-# #         return self._preco
+#     @preco.setter
+#     def preco(self, valor):
+#         if valor < 0:
+#             raise ValueError("Preço não pode ser negativo")
+#         self._preco = valor
 
-# #     @preco.setter
-# #     def preco(self, valor):
-# #         if valor < 0:
-# #             raise ValueError("Preço não pode ser negativo")
-# #         self._preco = valor
+# produto = Produto("Notebook", 2500.00)
+# print(f"Produto: {produto.nome}, Preço: {produto.preco}")
 
-# # produto = Produto("Notebook", 2500.00)
-# # print(f"Produto: {produto.nome}, Preço: {produto.preco}")
+# novo_preco = -100
+# try:
+#     produto.preco = novo_preco  
+# except ValueError as e:
+#     print(e)
 
-# # novo_preco = -100
-# # try:
-# #     produto.preco = novo_preco  
-# # except ValueError as e:
-# #     print(e)
-
-# # print(f"Produto: {produto.nome}, Preço: {produto.preco}")
+# print(f"Produto: {produto.nome}, Preço: {produto.preco}")
 
 
 
-# # class Funcionario:
-# #     def __init__(self, nome, salario):
-# #         self._nome = nome
-# #         self._salario = salario
+# class Funcionario:
+#     def __init__(self, nome, salario):
+#         self._nome = nome
+#         self._salario = salario
 
-# #     @property
-# #     def nome(self):
-# #         return self._nome
+#     @property
+#     def nome(self):
+#         return self._nome
 
-# #     @property
-# #     def salario(self):
-# #         return self._salario
+#     @property
+#     def salario(self):
+#         return self._salario
 
-# #     @salario.setter
-# #     def salario(self, valor):
-# #         if valor < 1500:
-# #             raise ValueError("Salario não pode ser menor que 1500")
-# #         self._salario = valor
+#     @salario.setter
+#     def salario(self, valor):
+#         if valor < 1500:
+#             raise ValueError("Salario não pode ser menor que 1500")
+#         self._salario = valor
 
-# # produto = Funcionario("Notebook", 1520.00)
-# # print(f"Funcionario: {produto.nome}, Salario R$: {produto.salario}")
+# produto = Funcionario("Notebook", 1520.00)
+# print(f"Funcionario: {produto.nome}, Salario R$: {produto.salario}")
 
-# # novo_salario = 2500
-# # try:
-# #     produto.salario = novo_salario  
-# # except ValueError as e:
-# #     print(e)
+# novo_salario = 2500
+# try:
+#     produto.salario = novo_salario  
+# except ValueError as e:
+#     print(e)
 
-# # print(f"Funcionario: {produto.nome}, Salario R$: {produto.salario}")
+# print(f"Funcionario: {produto.nome}, Salario R$: {produto.salario}")
 
 # # Herança simples
 # class Veiculo:
@@ -308,3 +306,4 @@
 
 # pix.autentica()
 # pix.processar_pagamento()
+

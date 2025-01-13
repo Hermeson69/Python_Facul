@@ -238,13 +238,13 @@ class SistemaFarmacia:
         self.usuario_logado = None
         self.guiche = Guiche()
 
-        # Usuários padrão
+      
         self.usuarios.append(Enfermeiro("Mariana", "98765432100", "COREN5678"))
         atendente = AtendenteFarmacia("Ana", "11223344556")
         self.usuarios.append(atendente)
         self.usuarios.append(Medico("Dr. João", "12312312399", "CRM12345"))
 
-        # Medicamentos padrão
+       
         medicamentos_iniciais = {
             "Dipirona": 100,
             "Paracetamol": 80,
@@ -351,8 +351,9 @@ class SistemaFarmacia:
 
             else:
                 print("Opção inválida. Tente novamente.")
+    # def menu_guiche(self):
 
-# Exemplo de uso
+
 def main():
     sistema = SistemaFarmacia()
     sistema.menu_interativo()
