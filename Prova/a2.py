@@ -39,27 +39,27 @@ class Carro:
     
 class Emprestimo:
     def __init__(self):
-        self.emprestimos = {}
+       self._emprestado = {}
     
     def adicionar_emprestimo(self, carro, cliente):
         if carro.emprestado:
             print(f"O carro de modelo: {carro.modelo} já está emprestado")
         else:
-            self.emprestimos[carro.placa] = (carro, cliente)
+            self._emprestado[carro.placa] = (carro, cliente)
             carro.emprestado = True
             print(f"Carro de modelo {carro.modelo} emprestado com sucesso para o cliente {cliente}")
     def devolver_carro(self, carro, cliente):
         if not carro.emprestado:
             print(f"Carro {carro.modelo}, não está emprestado")
         else:
-            self.emprestimos.pop(carro.placa, None)
+            self._emprestado.pop(carro.placa, None)
             carro.emprestado = False
             print(f"Carro de modelo {carro.modelo} devolvido pelo cliente {cliente}")
     def imprimir_emprestimos(self):
-        if not self.emprestimos:
+        if not self._emprestado:
             print("Nem um carro emprestado")
         else:
-            for placa, (carro, cliente) in self.emprestimos.items():
+            for placa, (carro, cliente) in self._emprestado.items():
                 print(f"Carro de Placa: {placa}, de modelo: {carro.modelo} emprestado a {cliente}")
 
 def main():

@@ -6,8 +6,8 @@ class Usuario(abc.ABC):
     """Classe abstrata base para representar um usuário do sistema."""
 
     def __init__(self, nome: str, cpf: str):
-        self._nome = nome
-        self._cpf = cpf
+        self.nome = nome
+        self.cpf = cpf
 
     @property
     def nome(self) -> str:
@@ -40,13 +40,16 @@ class Paciente(Usuario):
     def __init__(self, nome: str, cpf: str):
         super().__init__(nome, cpf)
 
+    def realizar_acao(self):
+        print(f"{self.nome} (Paciente) está aguardando atendimento.")
+
 # Classe para Médicos
 class Medico(Usuario):
     """Classe para representar um médico."""
 
     def __init__(self, nome: str, cpf: str, crm: str):
         super().__init__(nome, cpf)
-        self._crm = crm
+        self.crm = crm
         self._pacientes = {}
 
     @property
@@ -63,11 +66,20 @@ class Medico(Usuario):
     def pacientes(self):
         return self._pacientes
 
-    def chamar_paciente(self, cpf_paciente: str) -> str:
-        paciente = self._pacientes.get(cpf_paciente)
-        if paciente:
-            return f"Paciente {paciente.nome}, por favor, dirija-se à sala do Dr. {self.nome}."
-        return "Paciente não encontrado."
+    def listar_pacientes(self):
+        if not self._pacientes:
+            print("Nenhum paciente na lista.")
+        else:
+            print("Pacientes na lista:")
+            for idx, (cpf, paciente) in enumerate(self._pacientes.items(), start=1):
+                print(f"{idx}. Nome: {paciente.nome}, CPF: {cpf}")
+
+    def chamar_paciente(self, idx: int) -> str:
+        if idx < 1 or idx > len(self._pacientes):
+            return "Índice de paciente inválido."
+        cpf_paciente = list(self._pacientes.keys())[idx - 1]
+        paciente = self._pacientes[cpf_paciente]
+        return f"Paciente {paciente.nome}, por favor, dirija-se à sala do Dr. {self.nome}."
 
     def prescrever_medicamento(self, sistema, medicamento: str, quantidade: int, cpf_paciente: str) -> str:
         paciente = self._pacientes.get(cpf_paciente)
@@ -100,13 +112,48 @@ class Medico(Usuario):
     def realizar_acao(self):
         print(f"{self.nome} (Médico) está gerenciando os cuidados médicos dos pacientes.")
 
+class Guiche(Usuario):
+    """Classe para representar um guichê de atendimento."""
+
+    def __init__(self, nome: str, cpf: str):
+        super().__init__(nome, cpf)
+        self._pacientes = {}
+
+    def registrar_paciente(self, nome: str, cpf: str) -> str:
+        if cpf in self._pacientes:
+            return "Paciente já registrado."
+        self._pacientes[cpf] = Paciente(nome, cpf)
+        return f"Paciente {nome} registrado com sucesso."
+
+    def listar_pacientes(self):
+        if not self._pacientes:
+            print("Nenhum paciente registrado.")
+        else:
+            print("Pacientes registrados:")
+            for cpf, paciente in self._pacientes.items():
+                print(f"Nome: {paciente.nome}, CPF: {cpf}")
+
+    def obter_paciente(self, cpf: str) -> Paciente:
+        return self._pacientes.get(cpf)
+
+    def enviar_paciente_para_medico(self, cpf: str, medico: Medico) -> str:
+        paciente = self._pacientes.get(cpf)
+        if paciente:
+            medico._pacientes[cpf] = paciente
+            medico.listar_pacientes()  # Atualiza a lista de pacientes do médico
+            return f"Paciente {paciente.nome} enviado para o Dr. {medico.nome}."
+        return "Paciente não encontrado."
+
+    def realizar_acao(self):
+        print(f"{self.nome} (Guichê) está gerenciando o atendimento dos pacientes.")
+
 # Classe para Enfermeiros
 class Enfermeiro(Usuario):
     """Classe para representar um enfermeiro."""
 
     def __init__(self, nome: str, cpf: str, registro_coren: str):
         super().__init__(nome, cpf)
-        self._registro_coren = registro_coren
+        self.registro_coren = registro_coren
 
     @property
     def registro_coren(self) -> str:
@@ -139,30 +186,6 @@ class Enfermeiro(Usuario):
 
     def realizar_acao(self):
         print(f"{self.nome} (Enfermeiro) está gerenciando os cuidados médicos dos pacientes.")
-
-# Classe para Guichê de Atendimento
-class Guiche:
-    """Classe para gerenciar o registro e listagem de pacientes."""
-
-    def __init__(self):
-        self.pacientes = {}
-
-    def registrar_paciente(self, nome: str, cpf: str) -> str:
-        if cpf not in self.pacientes:
-            self.pacientes[cpf] = Paciente(nome, cpf)
-            return f"Paciente {nome} registrado com sucesso."
-        return f"Paciente {nome} já está registrado."
-
-    def listar_pacientes(self):
-        if self.pacientes:
-            print("Pacientes registrados:")
-            for cpf, paciente in self.pacientes.items():
-                print(f"Nome: {paciente.nome}, CPF: {cpf}")
-        else:
-            print("Nenhum paciente registrado.")
-
-    def obter_paciente(self, cpf: str) -> Paciente:
-        return self.pacientes.get(cpf, None)
 
 class AtendenteFarmacia(Usuario):
     """Classe para gerenciar o estoque e solicitações de medicamentos."""
@@ -221,10 +244,8 @@ class AtendenteFarmacia(Usuario):
         else:
             print("Nenhum registro no histórico.")
 
-    # Implementando o método abstrato
     def realizar_acao(self):
         print(f"{self.nome} (Atendente) está gerenciando o estoque e as solicitações.")
-
 
 # Classe para Sistema de Farmácia
 class SistemaFarmacia:
@@ -234,17 +255,15 @@ class SistemaFarmacia:
         self.usuarios = []
         self.solicitacoes = []
         self.prescricoes = []
+        self.guiche = Guiche("Guiche Principal", "00000000000")
         self.consultas = []
         self.usuario_logado = None
-        self.guiche = Guiche()
 
-      
         self.usuarios.append(Enfermeiro("Mariana", "98765432100", "COREN5678"))
         atendente = AtendenteFarmacia("Ana", "11223344556")
         self.usuarios.append(atendente)
         self.usuarios.append(Medico("Dr. João", "12312312399", "CRM12345"))
-
-       
+        self.usuarios.append(Guiche("Carlos", "99887766554"))
         medicamentos_iniciais = {
             "Dipirona": 100,
             "Paracetamol": 80,
@@ -275,6 +294,8 @@ class SistemaFarmacia:
                     self.menu_enfermeiro()
                 elif isinstance(self.usuario_logado, AtendenteFarmacia):
                     self.menu_atendente()
+                elif isinstance(self.usuario_logado, Guiche):
+                    self.menu_guiche()
 
     def login(self):
         cpf = input("CPF: ")
@@ -288,23 +309,34 @@ class SistemaFarmacia:
     def menu_medico(self):
         while True:
             print(f"\n=== Menu Médico ({self.usuario_logado.nome}) ===")
-            print("1. Chamar Paciente")
-            print("2. Realizar Consulta")
-            print("3. Logout")
+            print("1. Listar Pacientes")
+            print("2. Chamar Paciente")
+            print("3. Realizar Consulta")
+            print("4. Logout")
 
             escolha = input("Escolha uma opção: ")
 
             if escolha == "1":
-                cpf_paciente = input("CPF do Paciente: ")
-                print(self.usuario_logado.chamar_paciente(cpf_paciente))
+                self.usuario_logado.listar_pacientes()
 
             elif escolha == "2":
-                cpf_paciente = input("CPF do Paciente: ")
-                medicamento = input("Nome do Medicamento: ")
-                quantidade = int(input("Quantidade: "))
-                print(self.usuario_logado.realizar_consulta(self, cpf_paciente, medicamento, quantidade))
+                self.usuario_logado.listar_pacientes()
+                try:
+                    idx = int(input("Número do Paciente: "))
+                    print(self.usuario_logado.chamar_paciente(idx))
+                except ValueError:
+                    print("Entrada inválida. Por favor, insira um número.")
 
             elif escolha == "3":
+                cpf_paciente = input("CPF do Paciente: ")
+                medicamento = input("Nome do Medicamento: ")
+                try:
+                    quantidade = int(input("Quantidade: "))
+                    print(self.usuario_logado.realizar_consulta(self, cpf_paciente, medicamento, quantidade))
+                except ValueError:
+                    print("Entrada inválida. Por favor, insira um número para a quantidade.")
+
+            elif escolha == "4":
                 self.usuario_logado = None
                 break
 
@@ -351,12 +383,44 @@ class SistemaFarmacia:
 
             else:
                 print("Opção inválida. Tente novamente.")
-    # def menu_guiche(self):
 
+    def menu_guiche(self):
+        while True:
+            print(f"\n=== Menu Guichê ===")
+            print("1. Registrar Paciente")
+            print("2. Listar Pacientes")
+            print("3. Enviar Paciente para Médico")
+            print("4. Logout")
+
+            escolha = input("Escolha uma opção: ")
+
+            if escolha == "1":
+                nome = input("Nome do Paciente: ")
+                cpf = input("CPF do Paciente: ")
+                print(self.guiche.registrar_paciente(nome, cpf))
+
+            elif escolha == "2":
+                self.guiche.listar_pacientes()
+
+            elif escolha == "3":
+                cpf = input("CPF do Paciente: ")
+                nome_medico = input("Nome do Médico: ")
+                medico = next((u for u in self.usuarios if isinstance(u, Medico) and u.nome == nome_medico), None)
+                if medico:
+                    print(self.guiche.enviar_paciente_para_medico(cpf, medico))
+                else:
+                    print("Médico não encontrado.")
+
+            elif escolha == "4":
+                self.usuario_logado = None
+                break
+
+            else:
+                print("Opção inválida. Tente novamente.")
 
 def main():
     sistema = SistemaFarmacia()
     sistema.menu_interativo()
 
-
-main()
+if __name__ == "__main__":
+    main()
