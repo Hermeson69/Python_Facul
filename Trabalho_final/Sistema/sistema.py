@@ -1,4 +1,6 @@
 from Usuarios.usuarios import Medico, Guiche, Enfermeiro, AtendenteFarmacia, Administrador
+import os
+import platform
 
 class SistemaFarmacia:
     """Classe principal para gerenciar o sistema da farmácia."""
@@ -11,6 +13,7 @@ class SistemaFarmacia:
         self.usuario_logado = None
 
         administrador = Administrador("Admin", "00000000001")
+        self.movimentacoes = administrador.movimentacoes
         self.usuarios = administrador.usuarios
         self.usuarios.append(Enfermeiro("Mariana", "98765432100", "COREN5678"))
         atendente = AtendenteFarmacia("Ana", "11223344556")
@@ -18,6 +21,9 @@ class SistemaFarmacia:
         self.usuarios.append(Medico("Dr. João", "12312312399", "CRM12345"))
         self.usuarios.append(Guiche("Carlos", "99887766554"))
         self.usuarios.append(administrador)
+
+        # Adicionando um paciente inicial
+        self.guiche.registrar_paciente("José da Silva", "11122233344", 45)
         medicamentos_iniciais = {
             "Dipirona": 100,
             "Paracetamol": 80,
@@ -25,6 +31,13 @@ class SistemaFarmacia:
         }
         for medicamento, quantidade in medicamentos_iniciais.items():
             atendente.adicionar_medicamento(medicamento, quantidade)
+
+    def limpar_terminal(self):
+        sistema = platform.system()
+        if sistema == "Windows":
+            os.system("cls") 
+        else:
+            os.system("clear")
 
     def menu_interativo(self):
         while True:
@@ -59,6 +72,9 @@ class SistemaFarmacia:
             if usuario.cpf == cpf:
                 self.usuario_logado = usuario
                 print(f"Bem-vindo, {usuario.nome}!")
+                descricao = (f"Usuario {self.usuario_logado.nome} Logou no Sistema")
+                self.movimentacoes.append(descricao)
+                self.limpar_terminal()
                 return
         print("Usuário não encontrado.")
 
@@ -89,11 +105,14 @@ class SistemaFarmacia:
                 try:
                     quantidade = int(input("Quantidade: "))
                     print(self.usuario_logado.realizar_consulta(self, cpf_paciente, medicamento, quantidade))
+                    descricao = (f"Medico {self.usuario_logado.nome} realizou uma consulta para o paciente {cpf_paciente} e prescrevel o medicamento: {medicamento} em quantidade {quantidade} mg")
+                    self.movimentacoes.append(descricao)
                 except ValueError:
                     print("Entrada inválida. Por favor, insira um número para a quantidade.")
 
             elif escolha == "4":
                 self.usuario_logado = None
+                self.limpar_terminal()
                 break
 
             else:
@@ -110,9 +129,12 @@ class SistemaFarmacia:
             if escolha == "1":
                 nome_paciente = input("Nome do Paciente: ")
                 print(self.usuario_logado.solicitar_medicamento(self, nome_paciente))
+                descricao = (f"Enfermero {self.usuario_logado.nome} solicitou medicamento para o paciente {nome_paciente}")
+                self.movimentacoes.append(descricao)
 
             elif escolha == "2":
                 self.usuario_logado = None
+                self.limpar_terminal()
                 break
 
             else:
@@ -130,16 +152,24 @@ class SistemaFarmacia:
             escolha = input("Escolha uma opção: ")
 
             if escolha == "1":
-                print(self.usuario_logado.atender_solicitacao(self))
+                resultado = self.usuario_logado.atender_solicitacao(self)
+                print(resultado)
+                if "Solicitação atendida" in resultado:
+                    descricao = (f"Atendente {self.usuario_logado.nome} atendeu a solicitação de medicamento.")
+                    self.movimentacoes.append(descricao)
 
             elif escolha == "2":
-                medicamento = input("Nome do Medicamento: ")
-                quantidade = int(input("Quantidade: "))
-                disponivel, mensagem = self.usuario_logado.verificar_estoque(medicamento, quantidade)
-                print(mensagem)
+                self.usuario_logado.exibir_historico()
 
             elif escolha == "3":
-                self.usuario_logado.exibir_historico()
+                medicamento = input("Nome do Medicamento: ")
+                quantidade = self.usuario_logado.verificar_estoque(medicamento)
+                if quantidade > 0:
+                    print(f"Quantidade disponível de {medicamento}: {quantidade}")
+                else:
+                    print(f"{medicamento} não está disponível no estoque.")
+                descricao = (f"Atendente {self.usuario_logado.nome} verificou o estoque do medicamento {medicamento}")
+                self.movimentacoes.append(descricao)
 
             elif escolha == "4":
                 medicamento = input("Nome do Medicamento: ")
@@ -147,11 +177,14 @@ class SistemaFarmacia:
                     quantidade = int(input("Quantidade: "))
                     self.usuario_logado.adicionar_medicamento(medicamento, quantidade)
                     print(f"{quantidade} unidades de {medicamento} adicionadas ao estoque.")
+                    descricao = (f"Atendente {self.usuario_logado.nome}, cadastrou {medicamento} com quantidade {quantidade} na farmacia")
+                    self.movimentacoes.append(descricao)
                 except ValueError:
                     print("Entrada inválida. Por favor, insira um número para a quantidade.")
 
             elif escolha == "5":
                 self.usuario_logado = None
+                self.limpar_terminal()
                 break
 
             else:
@@ -172,6 +205,8 @@ class SistemaFarmacia:
                 cpf = input("CPF do Paciente: ")
                 idade = int(input("Idade do Paciente: "))
                 print(self.guiche.registrar_paciente(nome, cpf, idade))
+                descricao = (f"O Guiche {self.usuario_logado.nome} cadastrou o paciente: {nome} CPF: {cpf} para atendimento")
+                self.movimentacoes.append(descricao)
 
             elif escolha == "2":
                 self.guiche.listar_pacientes()
@@ -179,18 +214,26 @@ class SistemaFarmacia:
             elif escolha == "3":
                 cpf = input("CPF do Paciente: ")
                 nome_medico = input("Nome do Médico: ")
-                medico = next((u for u in self.usuarios if isinstance(u, Medico) and u.nome == nome_medico), None)
+                medico = None
+                for u in self.usuarios:
+                    if isinstance(u, Medico) and u.nome == nome_medico:
+                        medico = u
+                        break
                 if medico:
                     print(self.guiche.enviar_paciente_para_medico(cpf, medico))
+                    descricao = (f"O Guiche {self.usuario_logado.nome} enviou o paciente de CPF: {cpf} para o medico {medico.nome}")
+                    self.movimentacoes.append(descricao)
                 else:
                     print("Médico não encontrado.")
 
             elif escolha == "4":
                 self.usuario_logado = None
+                self.limpar_terminal()
                 break
 
             else:
                 print("Opção inválida. Tente novamente.")
+
     def menu_administrador(self):
         while True:
             print(f"\n=== Menu Administrador ({self.usuario_logado.nome}) ===")
@@ -208,6 +251,7 @@ class SistemaFarmacia:
 
             elif escolha == "3":
                 self.usuario_logado = None
+                self.limpar_terminal()
                 break
 
             else:
@@ -251,6 +295,7 @@ class SistemaFarmacia:
                 self.usuario_logado.listar_usuarios()
 
             elif escolha == "6":
+                self.limpar_terminal()
                 break
 
             else:
@@ -258,4 +303,4 @@ class SistemaFarmacia:
 
     def ver_relatorios(self):
         # Implementar a lógica para ver relatórios
-        pass
+        self.usuario_logado.movimentacoes_do_sistema()

@@ -85,17 +85,16 @@ class Medico(Usuario):
             for idx, (cpf, paciente) in enumerate(self._pacientes.items(), start=1):
                 print(f"{idx}. Nome: {paciente.nome}, CPF: {cpf}, Idade: {paciente.idade}")
 
-    def chamar_paciente(self) -> str:
+    def chamar_paciente(self, indice: int) -> str:
         if not self._pacientes:
             return "Nenhum paciente na lista."
 
-        # Priorizar pacientes com idade maior que 60 ou menor que 5
-        pacientes_prioritarios = [p for p in self._pacientes.values() if p.idade > 60 or p.idade < 5]
-        if pacientes_prioritarios:
-            paciente = pacientes_prioritarios[0]
-        else:
-            paciente = list(self._pacientes.values())[0]
+        pacientes_lista = list(self._pacientes.values())
+        indice -= 1  # Adjust for 1-based index
+        if indice < 0 or indice >= len(pacientes_lista):
+            return "Índice de paciente inválido."
 
+        paciente = pacientes_lista[indice]
         return f"Paciente {paciente.nome}, por favor, dirija-se à sala do Dr. {self.nome}."
 
     def prescrever_medicamento(self, sistema, medicamento: str, quantidade: int, cpf_paciente: str) -> str:
@@ -245,15 +244,13 @@ class AtendenteFarmacia(Usuario):
         self._historico.append(f"Adicionado {quantidade} unidades de {medicamento} em {datetime.datetime.now()}")
         return f"Medicamento {medicamento} adicionado. Estoque atual: {self._estoque[medicamento]} unidades."
 
-    def verificar_estoque(self, medicamento: str, quantidade: int):
+    def verificar_estoque(self, medicamento: str) -> int:
         if not isinstance(medicamento, str) or not medicamento.strip():
-            return False, "Nome do medicamento inválido."
-        if not isinstance(quantidade, int) or quantidade <= 0:
-            return False, "Quantidade de medicamento inválida."
+            return 0
+        quantidade_total = self._estoque.get(medicamento, 0)
+        return quantidade_total
 
-        if medicamento in self._estoque and self._estoque[medicamento] >= quantidade:
-            return True, f"Estoque disponível: {self._estoque[medicamento]} unidades de {medicamento}."
-        return False, f"Estoque insuficiente para {medicamento}. Disponível: {self._estoque.get(medicamento, 0)} unidades."
+
 
     def atender_solicitacao(self, sistema):
         if not sistema.solicitacoes:
@@ -264,15 +261,26 @@ class AtendenteFarmacia(Usuario):
         quantidade = solicitacao["quantidade"]
         enfermeiro = solicitacao["enfermeiro"]
 
-        disponivel, mensagem = self.verificar_estoque(medicamento, quantidade)
-        print(mensagem)  # Exibir status do estoque antes de decidir
+        disponivel = self.verificar_estoque(medicamento)
+        print(f"[DEBUG] Estoque antes da solicitação: {disponivel} unidades de {medicamento}. Solicitado: {quantidade} unidades.")
+        
+        medicamentos_iniciais = {
+            "Dipirona": 100,
+            "Paracetamol": 80,
+            "Amoxicilina": 50
+        }
 
-        if disponivel:
+        if medicamento in medicamentos_iniciais:
+            print(f"[DEBUG] Medicamento {medicamento} é inicial e será descontado do estoque.")
+
+        if disponivel >= quantidade:
             self._estoque[medicamento] -= quantidade
             self._historico.append(f"Entregue {quantidade} unidades de {medicamento} para {enfermeiro} em {datetime.datetime.now()}")
+            print(f"[DEBUG] Estoque atualizado: {self._estoque[medicamento]} unidades restantes de {medicamento}.")
             return f"Solicitação atendida: {quantidade} unidades de {medicamento} entregues para {enfermeiro}. Estoque restante: {self._estoque[medicamento]} unidades."
         else:
             self._historico.append(f"Falha ao atender solicitação de {quantidade} unidades de {medicamento} para {enfermeiro} em {datetime.datetime.now()} - Estoque insuficiente")
+            print(f"[DEBUG] Estoque insuficiente: {disponivel} unidades de {medicamento}.")
             return f"Estoque insuficiente para atender a solicitação de {quantidade} unidades de {medicamento} feita por {enfermeiro}."
 
     def exibir_historico(self):
@@ -291,10 +299,14 @@ class Administrador(Usuario):
     def __init__(self, nome: str, cpf: str):
         super().__init__(nome, cpf)
         self._usuarios = []
+        self._movimentacoes = []
 
     @property
     def usuarios(self):
         return self._usuarios
+    @property
+    def movimentacoes(self):
+        return self._movimentacoes
 
     def cadastrar_usuario(self, usuario: Usuario) -> str:
         if not isinstance(usuario, Usuario):
@@ -317,6 +329,18 @@ class Administrador(Usuario):
     def cadastrar_enfermeiro(self, nome: str, cpf: str, registro_coren: str) -> str:
         enfermeiro = Enfermeiro(nome, cpf, registro_coren)
         return self.cadastrar_usuario(enfermeiro)
+    
+    def registrar_movimentacao(self, descricao: str):
+        self._movimentacoes.append(f"{descricao} em {datetime.datetime.now()}")
+
+    def movimentacoes_do_sistema(self):
+        if self._movimentacoes:
+            print("Movimentações:")
+            for movimentacao in self._movimentacoes:
+                print(movimentacao)
+        else:
+            print("Nenhuma movimentação registrada.")
+
 
     def listar_usuarios(self):
         if not self._usuarios:
