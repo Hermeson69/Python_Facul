@@ -8,10 +8,11 @@ class SistemaFarmacia:
     def __init__(self):
         self.solicitacoes = []
         self.prescricoes = []
-        self.guiche = Guiche("Guiche Principal", "00000000000")
+        self.guiche = Guiche("Guiche Principal", "00000000000") #Guiche "Fisico"
         self.consultas = []
         self.usuario_logado = None
 
+        # Adiconado todos os usuarios para facilitar o uso;
         administrador = Administrador("Admin", "00000000001")
         self.movimentacoes = administrador.movimentacoes
         self.usuarios = administrador.usuarios
@@ -21,8 +22,7 @@ class SistemaFarmacia:
         self.usuarios.append(Medico("Dr. João", "12312312399", "CRM12345"))
         self.usuarios.append(Guiche("Carlos", "99887766554"))
         self.usuarios.append(administrador)
-
-        # Adicionando um paciente inicial
+        # Adiconando medicamentos para faciliatr o uso
         self.guiche.registrar_paciente("José da Silva", "11122233344", 45)
         medicamentos_iniciais = {
             "Dipirona": 100,
@@ -31,14 +31,14 @@ class SistemaFarmacia:
         }
         for medicamento, quantidade in medicamentos_iniciais.items():
             atendente.adicionar_medicamento(medicamento, quantidade)
-
+    # função básica para a limpagem do terminal após cada termino de usuario;
     def limpar_terminal(self):
         sistema = platform.system()
         if sistema == "Windows":
             os.system("cls") 
         else:
             os.system("clear")
-
+    # Menu geral onde puxa os demais
     def menu_interativo(self):
         while True:
             if not self.usuario_logado:
@@ -64,7 +64,7 @@ class SistemaFarmacia:
                 elif isinstance(self.usuario_logado, Guiche):
                     self.menu_guiche()
                 elif isinstance(self.usuario_logado, Administrador):
-                    self.menu_administrador()  # Adicionando o menu do Administrador
+                    self.menu_administrador()
 
     def login(self):
         cpf = input("CPF: ")
@@ -74,7 +74,6 @@ class SistemaFarmacia:
                 print(f"Bem-vindo, {usuario.nome}!")
                 descricao = (f"Usuario {self.usuario_logado.nome} Logou no Sistema")
                 self.movimentacoes.append(descricao)
-                self.limpar_terminal()
                 return
         print("Usuário não encontrado.")
 

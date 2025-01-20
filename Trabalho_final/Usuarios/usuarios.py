@@ -15,6 +15,7 @@ class Usuario(abc.ABC):
 
     @nome.setter
     def nome(self, value: str):
+        # Validação para garantir que o nome seja uma string não vazia
         if not isinstance(value, str) or not value.strip():
             raise ValueError("O nome deve ser uma string não vazia.")
         self._nome = value
@@ -25,12 +26,14 @@ class Usuario(abc.ABC):
 
     @cpf.setter
     def cpf(self, value: str):
+        # Validação para garantir que o CPF seja uma string de 11 dígitos numéricos
         if not isinstance(value, str) or len(value) != 11 or not value.isdigit():
             raise ValueError("CPF deve ser uma string de 11 dígitos numéricos.")
         self._cpf = value
 
     @abc.abstractmethod
     def realizar_acao(self):
+        # Método abstrato que deve ser implementado pelas subclasses
         pass
 
 # Classe para Pacientes
@@ -47,11 +50,13 @@ class Paciente(Usuario):
 
     @idade.setter
     def idade(self, value: int):
+        # Validação para garantir que a idade seja um número inteiro não negativo
         if not isinstance(value, int) or value < 0:
             raise ValueError("A idade deve ser um número inteiro não negativo.")
         self._idade = value
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe Paciente
         print(f"{self.nome} (Paciente) está aguardando atendimento.")
 
 # Classe para Médicos
@@ -69,6 +74,7 @@ class Medico(Usuario):
 
     @crm.setter
     def crm(self, value: str):
+        # Validação para garantir que o CRM não seja vazio
         if not isinstance(value, str) or not value.strip():
             raise ValueError("O CRM deve ser não Pode ser vazi0.")
         self._crm = value
@@ -78,6 +84,7 @@ class Medico(Usuario):
         return self._pacientes
 
     def listar_pacientes(self):
+        # Método para listar os pacientes do médico
         if not self._pacientes:
             print("Nenhum paciente na lista.")
         else:
@@ -86,11 +93,12 @@ class Medico(Usuario):
                 print(f"{idx}. Nome: {paciente.nome}, CPF: {cpf}, Idade: {paciente.idade}")
 
     def chamar_paciente(self, indice: int) -> str:
+        # Método para chamar um paciente pelo índice
         if not self._pacientes:
             return "Nenhum paciente na lista."
 
         pacientes_lista = list(self._pacientes.values())
-        indice -= 1  # Adjust for 1-based index
+        indice -= 1  # Ajusta para índice baseado em 1
         if indice < 0 or indice >= len(pacientes_lista):
             return "Índice de paciente inválido."
 
@@ -98,6 +106,7 @@ class Medico(Usuario):
         return f"Paciente {paciente.nome}, por favor, dirija-se à sala do Dr. {self.nome}."
 
     def prescrever_medicamento(self, sistema, medicamento: str, quantidade: int, cpf_paciente: str) -> str:
+        # Método para prescrever um medicamento para um paciente
         paciente = self._pacientes.get(cpf_paciente)
         if not paciente:
             return "Paciente não encontrado."
@@ -118,6 +127,7 @@ class Medico(Usuario):
         return f"Prescrição registrada: {prescricao}"
 
     def realizar_consulta(self, sistema, cpf_paciente: str, medicamento: str, quantidade: int) -> str:
+        # Método para realizar uma consulta e prescrever um medicamento
         paciente = sistema.guiche.obter_paciente(cpf_paciente)
         if not paciente:
             return "Paciente não encontrado."
@@ -131,8 +141,10 @@ class Medico(Usuario):
         return self.prescrever_medicamento(sistema, medicamento, quantidade, cpf_paciente)
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe Medico
         print(f"{self.nome} (Médico) está gerenciando os cuidados médicos dos pacientes.")
 
+# Classe para Guichê
 class Guiche(Usuario):
     """Classe para representar um guichê de atendimento."""
 
@@ -141,6 +153,7 @@ class Guiche(Usuario):
         self._pacientes = {}
 
     def registrar_paciente(self, nome: str, cpf: str, idade: int) -> str:
+        # Método para registrar um paciente no guichê
         if not isinstance(nome, str) or not nome.strip():
             return "Nome inválido."
         if not isinstance(cpf, str) or len(cpf) != 11 or not cpf.isdigit():
@@ -154,6 +167,7 @@ class Guiche(Usuario):
         return f"Paciente {nome} registrado com sucesso."
 
     def listar_pacientes(self):
+        # Método para listar os pacientes registrados no guichê
         if not self._pacientes:
             print("Nenhum paciente registrado.")
         else:
@@ -162,9 +176,11 @@ class Guiche(Usuario):
                 print(f"Nome: {paciente.nome}, CPF: {cpf}, Idade: {paciente.idade}")
 
     def obter_paciente(self, cpf: str) -> Paciente:
+        # Método para obter um paciente pelo CPF
         return self._pacientes.get(cpf)
 
     def enviar_paciente_para_medico(self, cpf: str, medico: Medico) -> str:
+        # Método para enviar um paciente para um médico
         paciente = self._pacientes.get(cpf)
         if paciente:
             medico._pacientes[cpf] = paciente
@@ -173,6 +189,7 @@ class Guiche(Usuario):
         return "Paciente não encontrado."
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe Guiche
         print(f"{self.nome} (Guichê) está gerenciando o atendimento dos pacientes.")
 
 # Classe para Enfermeiros
@@ -189,17 +206,20 @@ class Enfermeiro(Usuario):
 
     @registro_coren.setter
     def registro_coren(self, value: str):
+        # Validação para garantir que o registro do COREN não seja vazio
         if not isinstance(value, str) or not value.strip():
             raise ValueError("O registro do COREN não Pode ser vazi0.")
         self._registro_coren = value
 
     def pegar_prescricao(self, sistema, nome_paciente: str) -> dict:
+        # Método para pegar a prescrição de um paciente
         for prescricao in sistema.prescricoes:
             if prescricao["paciente"] == nome_paciente:
                 return prescricao
         return None
 
     def solicitar_medicamento(self, sistema, nome_paciente: str):
+        # Método para solicitar um medicamento para um paciente
         prescricao = self.pegar_prescricao(sistema, nome_paciente)
         if prescricao:
             sistema.solicitacoes.append({
@@ -213,8 +233,10 @@ class Enfermeiro(Usuario):
         return f"Nenhuma prescrição encontrada para o paciente {nome_paciente}."
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe Enfermeiro
         print(f"{self.nome} (Enfermeiro) está gerenciando os cuidados médicos dos pacientes.")
 
+# Classe para Atendentes de Farmácia
 class AtendenteFarmacia(Usuario):
     """Classe para gerenciar o estoque e solicitações de medicamentos."""
 
@@ -232,6 +254,7 @@ class AtendenteFarmacia(Usuario):
         return self._historico
 
     def adicionar_medicamento(self, medicamento: str, quantidade: int):
+        # Método para adicionar medicamentos ao estoque
         if not isinstance(medicamento, str) or not medicamento.strip():
             return "Nome do medicamento inválido."
         if not isinstance(quantidade, int) or quantidade <= 0:
@@ -245,14 +268,14 @@ class AtendenteFarmacia(Usuario):
         return f"Medicamento {medicamento} adicionado. Estoque atual: {self._estoque[medicamento]} unidades."
 
     def verificar_estoque(self, medicamento: str) -> int:
+        # Método para verificar a quantidade de um medicamento no estoque
         if not isinstance(medicamento, str) or not medicamento.strip():
             return 0
         quantidade_total = self._estoque.get(medicamento, 0)
         return quantidade_total
 
-
-
     def atender_solicitacao(self, sistema):
+        # Método para atender uma solicitação de medicamento
         if not sistema.solicitacoes:
             return "Nenhuma solicitação pendente."
 
@@ -262,7 +285,7 @@ class AtendenteFarmacia(Usuario):
         enfermeiro = solicitacao["enfermeiro"]
 
         disponivel = self.verificar_estoque(medicamento)
-        print(f"[DEBUG] Estoque antes da solicitação: {disponivel} unidades de {medicamento}. Solicitado: {quantidade} unidades.")
+        print(f"Estoque antes da solicitação: {disponivel} unidades de {medicamento}. Solicitado: {quantidade} unidades.")
         
         medicamentos_iniciais = {
             "Dipirona": 100,
@@ -271,19 +294,20 @@ class AtendenteFarmacia(Usuario):
         }
 
         if medicamento in medicamentos_iniciais:
-            print(f"[DEBUG] Medicamento {medicamento} é inicial e será descontado do estoque.")
+            print(f"Medicamento {medicamento} é inicial e será descontado do estoque.")
 
         if disponivel >= quantidade:
             self._estoque[medicamento] -= quantidade
             self._historico.append(f"Entregue {quantidade} unidades de {medicamento} para {enfermeiro} em {datetime.datetime.now()}")
-            print(f"[DEBUG] Estoque atualizado: {self._estoque[medicamento]} unidades restantes de {medicamento}.")
+            print(f"Estoque atualizado: {self._estoque[medicamento]} unidades restantes de {medicamento}.")
             return f"Solicitação atendida: {quantidade} unidades de {medicamento} entregues para {enfermeiro}. Estoque restante: {self._estoque[medicamento]} unidades."
         else:
             self._historico.append(f"Falha ao atender solicitação de {quantidade} unidades de {medicamento} para {enfermeiro} em {datetime.datetime.now()} - Estoque insuficiente")
-            print(f"[DEBUG] Estoque insuficiente: {disponivel} unidades de {medicamento}.")
+            print(f"Estoque insuficiente: {disponivel} unidades de {medicamento}.")
             return f"Estoque insuficiente para atender a solicitação de {quantidade} unidades de {medicamento} feita por {enfermeiro}."
 
     def exibir_historico(self):
+        # Método para exibir o histórico de movimentações do estoque
         if self._historico:
             print("Histórico de movimentações:")
             for registro in self._historico:
@@ -292,7 +316,10 @@ class AtendenteFarmacia(Usuario):
             print("Nenhum registro no histórico.")
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe AtendenteFarmacia
         print(f"{self.nome} (Atendente) está gerenciando o estoque e as solicitações.")
+
+# Classe para Administradores
 class Administrador(Usuario):
     """Classe para representar um administrador do sistema."""
 
@@ -304,36 +331,44 @@ class Administrador(Usuario):
     @property
     def usuarios(self):
         return self._usuarios
+
     @property
     def movimentacoes(self):
         return self._movimentacoes
 
     def cadastrar_usuario(self, usuario: Usuario) -> str:
+        # Método para cadastrar um usuário no sistema
         if not isinstance(usuario, Usuario):
             return "Usuário inválido."
         self._usuarios.append(usuario)
         return f"Usuário {usuario.nome} cadastrado com sucesso."
 
     def cadastrar_guiche(self, nome: str, cpf: str) -> str:
+        # Método para cadastrar um guichê no sistema
         guiche = Guiche(nome, cpf)
         return self.cadastrar_usuario(guiche)
 
     def cadastrar_medico(self, nome: str, cpf: str, crm: str) -> str:
+        # Método para cadastrar um médico no sistema
         medico = Medico(nome, cpf, crm)
         return self.cadastrar_usuario(medico)
 
     def cadastrar_atendente_farmacia(self, nome: str, cpf: str) -> str:
+        # Método para cadastrar um atendente de farmácia no sistema
         atendente = AtendenteFarmacia(nome, cpf)
         return self.cadastrar_usuario(atendente)
 
     def cadastrar_enfermeiro(self, nome: str, cpf: str, registro_coren: str) -> str:
+        # Método para cadastrar um enfermeiro no sistema
         enfermeiro = Enfermeiro(nome, cpf, registro_coren)
         return self.cadastrar_usuario(enfermeiro)
     
     def registrar_movimentacao(self, descricao: str):
+        # Método para registrar uma movimentação no sistema
         self._movimentacoes.append(f"{descricao} em {datetime.datetime.now()}")
 
     def movimentacoes_do_sistema(self):
+        # Método para listar as movimentações do sistema
         if self._movimentacoes:
             print("Movimentações:")
             for movimentacao in self._movimentacoes:
@@ -341,8 +376,8 @@ class Administrador(Usuario):
         else:
             print("Nenhuma movimentação registrada.")
 
-
     def listar_usuarios(self):
+        # Método para listar os usuários cadastrados no sistema
         if not self._usuarios:
             print("Nenhum usuário cadastrado.")
         else:
@@ -351,4 +386,5 @@ class Administrador(Usuario):
                 print(f"{idx}. Nome: {usuario.nome}, CPF: {usuario.cpf}, Tipo: {type(usuario).__name__}")
 
     def realizar_acao(self):
+        # Implementação do método abstrato para a classe Administrador
         print(f"{self.nome} (Administrador) está gerenciando o sistema.")
